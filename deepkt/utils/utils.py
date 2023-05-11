@@ -78,17 +78,12 @@ def eval_epoch(model, test_iterator, criterion, eval_func, device="cpu"):
     precision, recall, f_score, _ = precision_recall_fscore_support(
         targets, binary_preds
     )
-    pos_rate = np.sum(targets) / float(len(targets))
-    print(
-        "auc={0}, accuracy={1}, precision={2}, recall={3}, fscore={4}, pos_rate={5}".format(
-            auc_value, accuracy, precision, recall, f_score, pos_rate
-        )
-    )
+    print("auc={0}, accuracy={1}, precision={2}, recall={3}".format(auc_value, accuracy, precision, recall))
 
 
 def dkt_eval(logits, qid, targets, mask):
     pred, binary_pred = deepkt.loss.dkt_predict(logits, qid)
-    pred = torch.masked_select(pred, mask).detach().numpy()
+    pred = torch.masked_select(pred, mask).cpu().detach().numpy()
     binary_pred = torch.masked_select(binary_pred, mask).detach().numpy()
     target = torch.masked_select(targets, mask).detach().numpy()
     return pred, binary_pred, target
@@ -100,21 +95,9 @@ def deepirt_eval(logits, qid, targets, mask):
 
     logits = torch.masked_select(logits, mask)
 
-    pred = torch.sigmoid(logits).detach().numpy()
+    pred = torch.sigmoid(logits).cpu().detach().numpy()
     binary_pred = pred.round()
-    target = torch.masked_select(targets, mask).detach().numpy()
-    return pred, binary_pred, target
-
-
-def sakt_eval(logits, qid, targets, mask):
-    mask = mask.gt(0).view(-1)
-    targets = targets.view(-1)
-
-    logits = torch.masked_select(logits.view(-1), mask)
-
-    pred = torch.sigmoid(logits).detach().numpy()
-    binary_pred = pred.round()
-    target = torch.masked_select(targets, mask).detach().numpy()
+    target = torch.masked_select(targets, mask).cpu().detach().numpy()
     return pred, binary_pred, target
 
 

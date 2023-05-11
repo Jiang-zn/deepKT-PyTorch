@@ -1,30 +1,12 @@
 # -*- coding:utf-8 -*-
-"""
-    Paper reference: Deep-IRT: Make Deep Learning Based Knowledge Tracing
-    Explainable Using Item Response Theory (https://arxiv.org/pdf/1904.11738.pdf)
-
-    Note:
-        This DeepIRT is different from the original paper. It's a variant of the IRT.
-        The model here use a IRT to do the prediction, and use a sequence model to
-        estimate user's ability. For alpha and beta of IRT, each one has its own network
-        to do the estimation for each question/skill.
-"""
 import torch
 import torch.nn as nn
 
 
 class DeepIRT(nn.Module):
     def __init__(
-        self,
-        n_skill,
-        q_embed_dim,
-        qa_embed_dim,
-        hidden_dim,
-        kp_dim,
-        n_layer,
-        dropout,
-        device="cpu",
-        cell_type="lstm",
+            self, n_skill, q_embed_dim, qa_embed_dim, hidden_dim, kp_dim,
+            n_layer, dropout, device="cpu", cell_type="lstm",
     ):
         super(DeepIRT, self).__init__()
         self.n_skill = n_skill
