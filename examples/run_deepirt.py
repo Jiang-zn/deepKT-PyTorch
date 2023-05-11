@@ -38,14 +38,8 @@ def run(args):
                                  shuffle=False,
                                  collate_fn=partial(deepkt.data.collate_fn, n_skill=args.num_skill))
 
-    deepirt = DeepIRT(args.num_skill,
-                      args.q_embed_dim,
-                      args.qa_embed_dim,
-                      args.hidden_dim,
-                      args.kp_dim,
-                      args.layer_num,
-                      args.dropout,
-                      device=device)
+    deepirt = DeepIRT(args.num_skill, args.q_embed_dim, args.qa_embed_dim, args.hidden_dim,
+                      args.kp_dim, args.layer_num, args.dropout, device=device)
     optimizer = torch.optim.Adam(deepirt.parameters(), lr=args.learning_rate)
     loss_func = DeepIRTLoss()
 
@@ -58,6 +52,7 @@ def run(args):
                                  device)
         deepkt.utils.eval_epoch(deepirt, test_dataloader, loss_func, deepkt.utils.deepirt_eval, device)
         scheduler.step()
+
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(description="train deep IRT model")
