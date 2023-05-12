@@ -164,7 +164,6 @@ def deepirt_eval(logits, qid, targets, mask):
     return pred, binary_pred, target
 
 
-def deepdina_eval():
 
 
 def future_mask(seq_length):
