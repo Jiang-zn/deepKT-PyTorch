@@ -20,9 +20,7 @@ class DeepIRT(nn.Module):
         self.rnn = None
 
         self.q_embedding = nn.Embedding(n_skill + 1, q_embed_dim, padding_idx=n_skill)
-        self.qa_embedding = nn.Embedding(
-            2 * n_skill + 1, qa_embed_dim, padding_idx=2 * n_skill
-        )
+        self.qa_embedding = nn.Embedding(2 * n_skill + 1, qa_embed_dim, padding_idx=2 * n_skill)
 
         self.q_kp_relation = nn.Linear(self.q_embed_dim, self.kp_dim)
         self.q_difficulty = nn.Linear(self.q_embed_dim, self.kp_dim)
@@ -52,14 +50,12 @@ class DeepIRT(nn.Module):
                 batch_first=True,
                 dropout=self.dropout,
             )
-
         if self.rnn is None:
             raise ValueError("cell type only support lstm, rnn or gru type.")
 
     def forward(self, q, qa):
         q_embed_data = self.q_embedding(q)
         qa_embed_data = self.qa_embedding(qa)
-
         batch_size = q.size(0)
         seq_len = q.size(1)
 

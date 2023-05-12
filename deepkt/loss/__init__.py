@@ -1,1 +1,1 @@
-from .loss import *
+from .loss import DKTLoss, DeepIRTLoss, DeepDINALoss

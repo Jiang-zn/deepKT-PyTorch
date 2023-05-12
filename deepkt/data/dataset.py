@@ -37,7 +37,7 @@ class KTDataset(torch.utils.data.Dataset):
             torch.LongTensor(mask),
         )
 
-
+# 将输入数据进行填充，使其成为可以传入神经网络的张量
 def collate_fn(data, n_skill):
     qa = [x[0] for x in data]
     qid = [x[1] for x in data]
