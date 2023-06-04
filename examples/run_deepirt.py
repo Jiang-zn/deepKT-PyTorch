@@ -51,42 +51,42 @@ def rundeepirt(args):
         deepkt.utils.eval_epoch_irt(deepirt, test_dataloader, loss_func, deepkt.utils.deepirt_eval, device)
         scheduler.step()
 
-
-def rundeepdina(args):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    train_df = pd.read_csv("../data/assist2015_train.csv",
-                           header=None,
-                           sep='\t')
-    test_df = pd.read_csv("../data/assist2015_test.csv", header=None, sep='\t')
-
-    train = KTDataset(train_df, args.num_skill)
-    test = KTDataset(test_df, args.num_skill)
-    train_dataloader = DataLoader(train,
-                                  batch_size=args.batch_size,
-                                  num_workers=args.num_worker,
-                                  shuffle=True,
-                                  collate_fn=partial(deepkt.data.collate_fn, n_skill=args.num_skill))
-    test_dataloader = DataLoader(test,
-                                 batch_size=args.batch_size * 2,
-                                 num_workers=args.num_worker,
-                                 shuffle=False,
-                                 collate_fn=partial(deepkt.data.collate_fn, n_skill=args.num_skill))
-
-    deepdina = DeepDINA(args.num_skill, args.q_embed_dim, args.qa_embed_dim, args.hidden_dim,
-                      args.kp_dim, args.layer_num, args.dropout, device=device)
-    optimizer = torch.optim.Adam(deepdina.parameters(), lr=args.learning_rate)
-    loss_func = DeepDINALoss()
-    deepdina.to(device)
-    loss_func.to(device)
-
-
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
-    for epoch in range(args.epoch):
-        deepkt.utils.train_epoch_irt(deepdina, train_dataloader, optimizer, loss_func, device)
-        deepkt.utils.eval_epoch_irt(deepdina, test_dataloader, loss_func, deepkt.utils.deepdina_eval, device)
-        scheduler.step()
-
+#
+# def rundeepdina(args):
+#     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#
+#     train_df = pd.read_csv("../data/assist2015_train.csv",
+#                            header=None,
+#                            sep='\t')
+#     test_df = pd.read_csv("../data/assist2015_test.csv", header=None, sep='\t')
+#
+#     train = KTDataset(train_df, args.num_skill)
+#     test = KTDataset(test_df, args.num_skill)
+#     train_dataloader = DataLoader(train,
+#                                   batch_size=args.batch_size,
+#                                   num_workers=args.num_worker,
+#                                   shuffle=True,
+#                                   collate_fn=partial(deepkt.data.collate_fn, n_skill=args.num_skill))
+#     test_dataloader = DataLoader(test,
+#                                  batch_size=args.batch_size * 2,
+#                                  num_workers=args.num_worker,
+#                                  shuffle=False,
+#                                  collate_fn=partial(deepkt.data.collate_fn, n_skill=args.num_skill))
+#
+#     deepirt = DeepIRT(args.num_skill, args.q_embed_dim, args.qa_embed_dim, args.hidden_dim,
+#                       args.kp_dim, args.layer_num, args.dropout, device=device)
+#     optimizer = torch.optim.Adam(deepirt.parameters(), lr=args.learning_rate)
+#     loss_func = DeepDINALoss()
+#     deepirt.to(device)
+#     loss_func.to(device)
+#
+#
+#     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
+#     for epoch in range(args.epoch):
+#         deepirt.utils.train_epoch_irt(deepdina, train_dataloader, optimizer, loss_func, device)
+#         deepkt.utils.eval_epoch_irt(deepdina, test_dataloader, loss_func, deepkt.utils.deepdina_eval, device)
+#         scheduler.step()
+#
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(description="train deep IRT or DINA model")
@@ -97,7 +97,7 @@ if __name__ == "__main__":
                             required=False)
     arg_parser.add_argument("--batch_size",
                             dest="batch_size",
-                            default=64,
+                            default=32,
                             type=int,
                             required=False)
     arg_parser.add_argument("--num_skill",
@@ -151,5 +151,5 @@ if __name__ == "__main__":
                             type=int,
                             required=False)
     args = arg_parser.parse_args()
-    # rundeepirt(args)
-    rundeepdina(args)
+    rundeepirt(args)
+    # rundeepdina(args)

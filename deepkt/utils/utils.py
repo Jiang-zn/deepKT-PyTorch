@@ -23,6 +23,8 @@ def train_epoch_irt(model, train_iterator, optim, criterion, device="cpu"):
     model.train()
 
     for i, (qa, qid, labels, mask) in enumerate(train_iterator):
+        print(qa.shape)
+        print(qa)
         qa, qid, labels, mask = (
             qa.to(device),
             qid.to(device),
@@ -47,7 +49,6 @@ def train_epoch_dina(model, train_iterator, optim, criterion, device="cpu"):
             labels.to(device),
             mask.to(device),
         )
-
         optim.zero_grad()
         student_ability, guessing_probability, slipping_probability, item_response_prob, question_difficulty = model(
             qid, qa)
@@ -62,6 +63,7 @@ def eval_epoch_irt(model, test_iterator, criterion, eval_func, device="cpu"):
     eval_loss = []
     preds, binary_preds, targets = [], [], []
     for i, (qa, qid, labels, mask) in enumerate(test_iterator):
+
         qa, qid, labels, mask = (
             qa.to(device),
             qid.to(device),
