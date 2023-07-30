@@ -28,6 +28,7 @@ class DKTLoss(nn.Module):
 
         return loss
 
+
 # logits是形状为 (batch_size, max_seq_len, n_skill) 的张量，表示学生在不同题目上的掌握程度的预测值
 # targets是形状为 (batch_size, max_seq_len, n_skill) 的张量，是真实的学生答题情况，表示学生在不同题目上的实际掌握程度
 # qid是形状为 (batch_size, max_seq_len) 的张量，表示学生在不同题目上的题目id
@@ -48,36 +49,6 @@ class DeepIRTLoss(nn.Module):
         )
         return loss
 
-# logits是形状为 (batch_size, max_seq_len, n_skill) 的张量，表示学生在不同题目上的掌握程度的预测值
-# targets是形状为 (batch_size, max_seq_len, n_skill) 的张量，是真实的学生答题情况，表示学生在不同题目上的实际掌握程度
-# q是形状为 (n_skill, ) 的张量，表示每个题目的 q 值
-# qa是形状为 (batch_size, max_seq_len, n_skill) 的张量，表示每个学生在每个题目上的 q 矩阵中的答题情况
-# mask是形状为 (batch_size, max_seq_len) 的张量，用于标记哪些位置是真实数据，哪些位置是填充数据
-class DeepDINALoss(nn.Module):
-    def __init__(self, reduce="mean"):
-        super(DeepDINALoss, self).__init__()
-        self.reduce = reduce
-
-    def forward(self, logits, targets, q, qa, mask, device="cpu"):
-        mask = mask.gt(0).view(-1)
-        targets = targets.view(-1)
-
-        logits = torch.masked_select(logits, mask)
-        targets = torch.masked_select(targets, mask)
-
-        # Extracting q and qa values from the input tensors
-        q = q.unsqueeze(-1).expand_as(qa).reshape(-1)
-        qa = qa.reshape(-1)
-
-        # DINA model calculation
-        p_q_given_theta = torch.sigmoid(qa - q)
-        p_correct_given_qa = p_q_given_theta * logits + (1 - p_q_given_theta) * (1 - logits)
-
-        # Computing loss
-        loss = torch.nn.functional.binary_cross_entropy(
-            p_correct_given_qa, targets.float(), reduction=self.reduce
-        )
-        return loss
 
 def dkt_predict(logits, qid):
     preds = torch.sigmoid(logits)

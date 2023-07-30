@@ -39,31 +39,12 @@ def train_epoch_irt(model, train_iterator, optim, criterion, device="cpu"):
         optim.step()
 
 
-def train_epoch_dina(model, train_iterator, optim, criterion, device="cpu"):
-    model.train()
-
-    for i, (qa, qid, labels, mask) in enumerate(train_iterator):
-        qa, qid, labels, mask = (
-            qa.to(device),
-            qid.to(device),
-            labels.to(device),
-            mask.to(device),
-        )
-        optim.zero_grad()
-        student_ability, guessing_probability, slipping_probability, item_response_prob, question_difficulty = model(
-            qid, qa)
-        loss = criterion(item_response_prob, labels, qid, mask, device=device)
-        loss.backward()
-        optim.step()
-
-
 def eval_epoch_irt(model, test_iterator, criterion, eval_func, device="cpu"):
     model.eval()
 
     eval_loss = []
     preds, binary_preds, targets = [], [], []
     for i, (qa, qid, labels, mask) in enumerate(test_iterator):
-
         qa, qid, labels, mask = (
             qa.to(device),
             qid.to(device),
@@ -102,50 +83,6 @@ def eval_epoch_irt(model, test_iterator, criterion, eval_func, device="cpu"):
     print("auc={0}, accuracy={1}, precision={2}, recall={3}".format(auc_value, accuracy, precision, recall))
 
 
-def eval_epoch_dina(model, test_iterator, criterion, eval_func, device="cpu"):
-    model.eval()
-
-    eval_loss = []
-    preds, binary_preds, targets = [], [], []
-    for i, (qa, qid, labels, mask) in enumerate(test_iterator):
-        qa, qid, labels, mask = (
-            qa.to(device),
-            qid.to(device),
-            labels.to(device),
-            mask.to(device),
-        )
-
-        with torch.no_grad():
-            student_ability, guessing_probability, slipping_probability, item_response_prob, question_difficulty = model(qid, qa)
-
-        loss = criterion(item_response_prob, labels, qid, mask, device=device)
-        eval_loss.append(loss.detach().item())
-
-        mask = mask.eq(1)
-
-        # pred, binary_pred = deepkt.loss.dkt_predict(logits, qid)
-        # pred = torch.masked_select(pred, mask).detach().numpy()
-        # binary_pred = torch.masked_select(binary_pred, mask).detach().numpy()
-        # target = torch.masked_select(labels, mask).detach().numpy()
-        # pred = pred.cpu().detach().numpy().reshape(-1)
-        # binary_pred = binary_pred.cpu().detach().numpy().reshape(-1)
-        pred, binary_pred, target = eval_func(item_response_prob, qid, labels, mask)
-        preds.append(pred)
-        binary_preds.append(binary_pred)
-        targets.append(target)
-
-    preds = np.concatenate(preds)
-    binary_preds = np.concatenate(binary_preds)
-    targets = np.concatenate(targets)
-
-    auc_value = roc_auc_score(targets, preds)
-    accuracy = accuracy_score(targets, binary_preds)
-    precision, recall, f_score, _ = precision_recall_fscore_support(
-        targets, binary_preds
-    )
-    print("auc={0}, accuracy={1}, precision={2}, recall={3}".format(auc_value, accuracy, precision, recall))
-
-
 def dkt_eval(logits, qid, targets, mask):
     pred, binary_pred = deepkt.loss.dkt_predict(logits, qid)
     pred = torch.masked_select(pred, mask).cpu().detach().numpy()
@@ -164,8 +101,6 @@ def deepirt_eval(logits, qid, targets, mask):
     binary_pred = pred.round()
     target = torch.masked_select(targets, mask).cpu().detach().numpy()
     return pred, binary_pred, target
-
-
 
 
 def future_mask(seq_length):

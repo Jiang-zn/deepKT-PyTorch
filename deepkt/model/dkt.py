@@ -9,18 +9,10 @@ import torch.nn as nn
 
 class DKT(nn.Module):
     def __init__(
-        self,
-        embed_dim,
-        input_dim,
-        hidden_dim,
-        layer_num,
-        output_dim,
-        dropout,
-        device="cpu",
-        cell_type="lstm",
+            self, embed_dim, input_dim, hidden_dim, layer_num, output_dim, dropout, device="cpu",
+            cell_type="lstm",
     ):
         """ The first deep knowledge tracing network architecture.
-
         :param embed_dim: int, the embedding dim for each skill.
         :param input_dim: int, the number of skill(question) * 2.
         :param hidden_dim: int, the number of hidden state dim.
@@ -40,10 +32,7 @@ class DKT(nn.Module):
         self.cell_type = cell_type
         self.rnn = None
 
-        self.skill_embedding = nn.Embedding(
-            self.input_dim, self.embed_dim, padding_idx=self.input_dim - 1
-        )
-
+        self.skill_embedding = nn.Embedding(self.input_dim, self.embed_dim, padding_idx=self.input_dim - 1)
         if cell_type.lower() == "lstm":
             self.rnn = nn.LSTM(
                 self.embed_dim,
@@ -69,29 +58,21 @@ class DKT(nn.Module):
                 dropout=self.dropout,
             )
         self.fc = nn.Linear(self.hidden_dim, self.output_dim)
-
         if self.rnn is None:
             raise ValueError("cell type only support lstm, rnn or gru type.")
 
     def forward(self, q, qa, state_in=None):
         """
-
         :param x: The input is a tensor(int64) with 2 dimension, like [H, k]. H is the batch size,
         k is the length of user's skill/question id sequence.
         :param state_in: optional. The state tensor for sequence model.
         :return:
         """
         qa = self.skill_embedding(qa)
-        h0 = torch.zeros(
-            (self.layer_num, qa.size(0), self.hidden_dim), device=self.device
-        )
-        c0 = torch.zeros(
-            (self.layer_num, qa.size(0), self.hidden_dim), device=self.device
-        )
-
+        h0 = torch.zeros((self.layer_num, qa.size(0), self.hidden_dim), device=self.device)
+        c0 = torch.zeros((self.layer_num, qa.size(0), self.hidden_dim), device=self.device)
         if state_in is None:
             state_in = (h0, c0)
-
         state, state_out = self.rnn(qa, state_in)
         logits = self.fc(state)
         return logits, state_out
