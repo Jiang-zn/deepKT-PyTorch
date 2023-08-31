@@ -63,7 +63,6 @@ class DeepIRT(nn.Module):
         states, _ = self.rnn(qa_embed_data)
         # states_before = torch.cat((h0, states[:, :-1, :]), 1)
         user_ability = self.user_ability(states).view(batch_size * seq_len, -1)
-
         kp_relation = torch.softmax(
             self.q_kp_relation(q_embed_data.view(batch_size * seq_len, -1)), dim=1
         )
